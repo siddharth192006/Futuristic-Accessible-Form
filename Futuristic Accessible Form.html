@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Accessible Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --secondary: #ff00ff;
+            --bg-dark: #1a1a2e;
+            --text-light: #e0e0e0;
+            --error: #ff4d4d;
+        }
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #16213e);
+            color: var(--text-light);
+        }
+        .custom-select, .custom-checkbox, .custom-radio {
+            position: relative;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .custom-select .select-display {
+            padding: 0.75rem;
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, rgba(20, 20, 50, 0.8), rgba(30, 30, 60, 0.8));
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+            animation: pulseGlow 2s infinite alternate;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+            100% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.5); }
+        }
+        .custom-select:hover .select-display, .custom-select.active .select-display {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+        .custom-select .options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(45deg, rgba(20, 20, 50, 0.9), rgba(30, 30, 60, 0.9));
+            border-radius: 0.5rem;
+            margin-top: 0.25rem;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+        .custom-select.active .options {
+            display: block;
+        }
+        .custom-select .option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .custom-select .option:hover {
+            background: rgba(0, 242, 255, 0.3);
+            color: var(--primary);
+        }
+        .custom-checkbox label, .custom-radio label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .custom-checkbox label:hover, .custom-radio label:hover {
+            transform: translateX(5px);
+        }
+        .custom-checkbox .checkmark, .custom-radio .radiomark {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--primary);
+            margin-right: 0.75rem;
+            background: #2a2a4a;
+            position: relative;
+            transition: all 0.3s ease-in-out;
+        }
+        .custom-checkbox .checkmark {
+            border-radius: 0; /* Simple square */
+        }
+        .custom-radio .radiomark {
+            border-radius: 50%; /* Simple circle */
+        }
+        .custom-checkbox input:checked + .checkmark {
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+        .custom-radio input:checked + .radiomark {
+            background: var(--secondary);
+            box-shadow: 0 0 15px var(--secondary);
+        }
+        .custom-checkbox input:checked + .checkmark::after {
+            content: '✔';
+            color: var(--bg-dark);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            animation: scaleIn 0.2s ease;
+        }
+        .custom-radio input:checked + .radiomark::after {
+            content: '';
+            width: 0.75rem;
+            height: 0.75rem;
+            background: var(--text-light);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: scaleIn 0.2s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+        .custom-checkbox input:focus + .checkmark, .custom-radio input:focus + .radiomark {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        .custom-checkbox input, .custom-radio input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 10;
+        }
+        [aria-invalid="true"] + * {
+            border-color: var(--error) !important;
+            box-shadow: 0 0 10px var(--error) !important;
+        }
+        .error-message {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+            100% { box-shadow: 0 0 30px rgba(0, 242, 255, 0.5); }
+        }
+        button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+        button:hover::before {
+            left: 100%;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+        }
+        .modal-content {
+            background: linear-gradient(45deg, rgba(20, 20, 50, 0.9), rgba(30, 30, 60, 0.9));
+            padding: 2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content button {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+        }
+        @media (max-width: 640px) {
+            .custom-select, .custom-checkbox, .custom-radio {
+                width: 100%;
+            }
+            .form-container {
+                padding: 1rem;
+            }
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="form-container p-8 rounded-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)]">User Profile</h1>
+        <form id="profileForm" class="space-y-6" novalidate>
+            <!-- Country Dropdown -->
+            <div class="custom-select">
+                <label for="country" class="block text-sm font-medium mb-1">Country</label>
+                <input type="hidden" id="country" name="country" required aria-describedby="country-error">
+                <div class="select-display" role="combobox" aria-expanded="false" aria-controls="country-options" tabindex="0">
+                    <span class="selected-text">Select a country</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div id="country-options" class="options" role="listbox">
+                    <div class="option" role="option" data-value="US">United States</div>
+                    <div class="option" role="option" data-value="CA">Canada</div>
+                    <div class="option" role="option" data-value="GB">United Kingdom</div>
+                    <div class="option" role="option" data-value="AU">Australia</div>
+                    <div class="option" role="option" data-value="IN">India</div>
+                    <div class="option" role="option" data-value="CN">China</div>
+                    <div class="option" role="option" data-value="BR">Brazil</div>
+                    <div class="option" role="option" data-value="ZA">South Africa</div>
+                </div>
+                <div id="country-error" class="error-message hidden" role="alert">Please select a country.</div>
+            </div>
+
+            <!-- Skills Checkboxes -->
+            <fieldset class="space-y-3">
+                <legend class="text-sm font-medium">Skills</legend>
+                <div class="custom-checkbox">
+                    <input type="checkbox" id="skill-js" name="skills" value="JavaScript" aria-describedby="skills-error">
+                    <span class="checkmark"></span>
+                    <label for="skill-js">JavaScript</label>
+                </div>
+                <div class="custom-checkbox">
+                    <input type="checkbox" id="skill-py" name="skills" value="Python">
+                    <span class="checkmark"></span>
+                    <label for="skill-py">Python</label>
+                </div>
+                <div class="custom-checkbox">
+                    <input type="checkbox" id="skill-java" name="skills" value="Java">
+                    <span class="checkmark"></span>
+                    <label for="skill-java">Java</label>
+                </div>
+                <div class="custom-checkbox">
+                    <input type="checkbox" id="skill-sql" name="skills" value="SQL">
+                    <span class="checkmark"></span>
+                    <label for="skill-sql">SQL</label>
+                </div>
+                <div id="skills-error" class="error-message hidden" role="alert">Please select at least one skill.</div>
+            </fieldset>
+
+            <!-- Gender Radio Buttons -->
+            <fieldset class="space-y-3">
+                <legend class="text-sm font-medium">Gender</legend>
+                <div class="custom-radio">
+                    <input type="radio" id="gender-male" name="gender" value="Male" required aria-describedby="gender-error">
+                    <span class="radiomark"></span>
+                    <label for="gender-male">Male</label>
+                </div>
+                <div class="custom-radio">
+                    <input type="radio" id="gender-female" name="gender" value="Female">
+                    <span class="radiomark"></span>
+                    <label for="gender-female">Female</label>
+                </div>
+                <div class="custom-radio">
+                    <input type="radio" id="gender-other" name="gender" value="Other">
+                    <span class="radiomark"></span>
+                    <label for="gender-other">Other</label>
+                </div>
+                <div id="gender-error" class="error-message hidden" role="alert">Please select a gender.</div>
+            </fieldset>
+
+            <button type="submit" class="w-full text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 focus:ring-offset-[var(--bg-dark)]">Submit</button>
+        </form>
+    </div>
+
+    <!-- Thank You Modal -->
+    <div id="thankYouModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)]">Thank You!</h2>
+            <button id="closeModal" class="bg-[var(--primary)] text-[var(--bg-dark)] hover:bg-[var(--secondary)] focus:ring-2 focus:ring-[var(--primary)]">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Debounce function for performance
+        function debounce(fn, ms) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn(...args), ms);
+            };
+        }
+
+        // Initialize form
+        const form = document.getElementById('profileForm');
+        const countrySelect = document.getElementById('country');
+        const selectDisplay = document.querySelector('.select-display');
+        const selectText = selectDisplay.querySelector('.selected-text');
+        const optionsContainer = document.getElementById('country-options');
+        const modal = document.getElementById('thankYouModal');
+        const closeModalBtn = document.getElementById('closeModal');
+
+        // Custom dropdown functionality
+        function toggleOptions() {
+            const isActive = selectDisplay.parentElement.classList.toggle('active');
+            selectDisplay.setAttribute('aria-expanded', isActive);
+        }
+
+        function selectOption(value, text) {
+            countrySelect.value = value;
+            selectText.textContent = text;
+            selectDisplay.parentElement.classList.remove('active');
+            selectDisplay.setAttribute('aria-expanded', 'false');
+            validateForm();
+        }
+
+        selectDisplay.addEventListener('click', toggleOptions);
+        selectDisplay.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleOptions();
+            }
+        });
+
+        optionsContainer.addEventListener('click', (e) => {
+            const option = e.target.closest('.option');
+            if (option) {
+                selectOption(option.dataset.value, option.textContent);
+            }
+        });
+
+        optionsContainer.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.classList.contains('option')) {
+                selectOption(e.target.dataset.value, e.target.textContent);
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!selectDisplay.contains(e.target) && !optionsContainer.contains(e.target)) {
+                selectDisplay.parentElement.classList.remove('active');
+                selectDisplay.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Modal functionality
+        function showModal() {
+            modal.style.display = 'flex';
+            closeModalBtn.focus();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Form validation
+        const validateForm = debounce(() => {
+            let isValid = true;
+
+            // Country validation
+            const countryError = document.getElementById('country-error');
+            if (!countrySelect.value) {
+                countrySelect.setAttribute('aria-invalid', 'true');
+                countryError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                countrySelect.removeAttribute('aria-invalid');
+                countryError.classList.add('hidden');
+            }
+
+            // Skills validation
+            const skills = document.querySelectorAll('input[name="skills"]:checked');
+            const skillsError = document.getElementById('skills-error');
+            if (skills.length === 0) {
+                skillsError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                skillsError.classList.add('hidden');
+            }
+
+            // Gender validation
+            const gender = document.querySelector('input[name="gender"]:checked');
+            const genderError = document.getElementById('gender-error');
+            if (!gender) {
+                genderError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                genderError.classList.add('hidden');
+            }
+
+            return isValid;
+        }, 300);
+
+        // Event delegation for form inputs
+        form.addEventListener('change', validateForm);
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const isValid = validateForm();
+            if (isValid) {
+                showModal();
+                form.reset();
+                selectText.textContent = 'Select a country';
+                countrySelect.value = '';
+                document.querySelectorAll('.error-message').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+            }
+        });
+
+        // Keyboard navigation for custom elements
+        form.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.matches('.custom-checkbox label, .custom-radio label')) {
+                e.target.querySelector('input').click();
+            }
+        });
+    </script>
+</body>
+</html>
